@@ -1,0 +1,8 @@
+Description:
+    Create Vue form corresponding to the Rails model
+
+Example:
+    rails generate vue Profile id name
+
+    This will create:
+        app/javascript/packs/components/forms/[model]_form.vue

@@ -1,0 +1,73 @@
+<template>
+  <form @submit.prevent="save">
+
+  </form>
+</template>
+
+<script>
+  export default {
+    name: "<%= component_name %>",
+    data() {
+      return {
+        item: {
+        <%- attributes.each do |attribute| -%>
+          "<%= attribute.name %>": null,
+        <%- end -%>
+        },
+        errors: {},
+      };
+    },
+    <%- if editable? -%>
+      props: {
+        id: Number,
+      },
+      mounted() {
+        if (this.id) {
+          this.$http.get(`/<%= component_file_name %>/${this.id}`).then((response) => {
+          <%- attributes.each do |attribute| -%>
+            this.item.<%= attribute.name %> = response.body.item.<%= attribute.name %>;
+          <%- end -%>
+          });
+        }
+      },
+    <%- end -%>
+    methods: {
+      title() {
+      <%- if editable? -%>
+        return this.id ? this.t("<%= component_file_name %>.form.edit"): this.t("<%= component_file_name %>.form.new");
+      <%- else -%>
+        return this.t("<%= component_file_name %>.form.new");
+      <%- end -%>
+      },
+      save() {
+      <%- if editable? -%>
+        if (this.item.id) {
+          return this.$http.put(`/<%= component_file_name %>/${this.item.id}`, this.item).then((response) => {
+            if (response.body.success) {
+              window.location.reload(true);
+            } else {
+              this.errors = response.body.errors;
+            }
+          });
+        } else {
+          return this.$http.post("/<%= component_file_name %>", this.item).then((response) => {
+            if (response.body.success) {
+              window.location.reload(true);
+            } else {
+              this.errors = response.body.errors;
+            }
+          });
+        }
+      <%- else -%>
+        return this.$http.post("/<%= component_file_name %>", this.item).then((response) => {
+          if (response.body.success) {
+            window.location.reload(true);
+          } else {
+            this.errors = response.body.errors;
+          }
+        });
+      <%- end -%>
+      },
+    },
+  };
+</script>
